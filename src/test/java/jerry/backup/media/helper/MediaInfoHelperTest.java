@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 
 @SpringBootTest
 @ActiveProfiles(value = "dev")
@@ -18,8 +19,13 @@ public class MediaInfoHelperTest {
 
     @Test
     public void getTimeFromMetaData() throws ImageProcessingException, IOException {
-        File file = new File("/Users/jerry/Desktop/WechatIMG4.jpeg");
-        mediaInfoHelper.getTimeFromMetaData(file);
+//        File file = new File("Z:\\照片\\日常\\朵朵\\2023\\05\\IMG_0095.JPG");
+        File file = new File("Z:\\verysyncbackup\\jerry-iphone\\photos\\IMG_20231104_5205.HEIC");
+        Instant createTime = mediaInfoHelper.getCreateTimeFromMetaData(file);
+        if (null != createTime){
+            System.out.println(createTime);
+        }
+
         System.out.println("==================");
 
     }
