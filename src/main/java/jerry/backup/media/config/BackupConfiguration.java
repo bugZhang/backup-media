@@ -16,6 +16,8 @@ public class BackupConfiguration {
     private String sourcePath;
     private String targetPath;
 
-    private ArrayList<String> excludeDirName;
+    private ArrayList<String> excludeFolderName;
+
+    private ArrayList<String> excludeFileName;
 
 }

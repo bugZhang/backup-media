@@ -8,5 +8,8 @@ spring:
 
 backup:
   media:
-    sourcePath: "asdf"
+    sourcePath: "/Users/jerry/Downloads"
     targetPath: "dddd"
+    excludeFolderName:
+      - ".platform"
+      - ".git"

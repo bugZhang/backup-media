@@ -1,5 +1,6 @@
 package jerry.backup.media.data;
 
+import jerry.backup.media.enums.FailedReasonEnum;
 import jerry.backup.media.enums.MediaTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,9 +10,8 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "media")
-public class Media extends BaseModel<Long>{
-
+@Table(name = "failed_jobs")
+public class FailedJob extends BaseModel<Long>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +21,5 @@ public class Media extends BaseModel<Long>{
     private String sourceDirPath;
     private String reverseSourceDir;    // 反转路径，做索引用
     private String targetFilePath;
-    private Integer result;
-
-
+    private FailedReasonEnum reason;
 }
