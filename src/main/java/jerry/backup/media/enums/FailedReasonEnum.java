@@ -5,6 +5,7 @@ import lombok.Getter;
 public enum FailedReasonEnum {
     UNKNOWN(0),
     REPEAT(1),
+    PARSE_FILENAME_FAILED(2),
     ;
 
     @Getter

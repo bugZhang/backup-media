@@ -26,9 +26,20 @@ public class SyncJob implements InitializingBean {
 
     public void start(){
         log.info("sync job start ...");
+        startFailed();
+        startRepeat();
+        startMedia();;
     }
 
     public void startFailed(){
+
+    }
+
+    public void startRepeat(){
+
+    }
+
+    public void startMedia(){
 
     }
 
