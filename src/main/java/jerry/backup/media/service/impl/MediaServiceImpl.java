@@ -29,4 +29,10 @@ public class MediaServiceImpl implements IMediaService {
 
         return mediaRepository.findFirstByReverseSourceDirAndFilename(reverseSourceDir, filename);
     }
+
+    @Override
+    public boolean hasProcessed(String sourceDirPath, String filename) {
+        String reverseSourceDir = new StringBuilder(sourceDirPath).reverse().toString();
+        return mediaRepository.existsByReverseSourceDirAndFilename(reverseSourceDir, filename);
+    }
 }

@@ -3,6 +3,8 @@ package jerry.backup.media.service;
 import jerry.backup.media.config.BackupConfiguration;
 import jerry.backup.media.data.Media;
 import jerry.backup.media.enums.MediaTypeEnum;
+import jerry.xtool.utils.StringUtils;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,14 +23,14 @@ public class MediaServiceTest {
     private IMediaService mediaService;
 
 
-    @Test
+    @RepeatedTest(5)
     public void save(){
 
         System.out.println("----------------" + configuration.getSourcePath());
 
         Media media = new Media();
         media.setType(MediaTypeEnum.UNKNOWN);
-        media.setFilename("Procfile.sandbox");
+        media.setFilename(StringUtils.randomString(8));
         media.setSourceDirPath("/Users/jerry/Documents/java-workspace/holla/monkey/monkey-user-service/");
         media.setTargetFilePath("/Users/jerry/Documents/java-workspace/holla/monkey/target");
         media.setResult(2);
@@ -43,6 +45,15 @@ public class MediaServiceTest {
         System.out.println("==============");
         System.out.println(mediaOpt.get().getSourceDirPath());
         System.out.println(mediaOpt.get().getFilename());
+    }
+
+    @Test
+    public void hasProcessed(){
+        String sourceDirPath = "/Users/jerry/Documents/java-workspace/holla/monkey/monkey-user-service/";
+        String filename = "2EqfkAt15";
+        boolean hasProcessed = mediaService.hasProcessed(sourceDirPath, filename);
+        System.out.println("-----------------");
+        System.out.println(hasProcessed);
     }
 
 }

@@ -1,6 +1,7 @@
 package jerry.backup.media.helper;
 
 import jerry.backup.media.data.FailedJob;
+import jerry.backup.media.data.Media;
 import jerry.backup.media.enums.FailedReasonEnum;
 import jerry.backup.media.enums.MediaTypeEnum;
 import jerry.backup.media.service.IFailedJobService;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 @Component
@@ -147,11 +149,11 @@ public class SyncHelper {
 
     }
 
-    private void copy(String sourcePath, String targetPath, MediaTypeEnum mediaType) throws IOException {
-        File sourceFile = new File(sourcePath);
+    private void copy(String sourceFilePath, String targetDirPath, MediaTypeEnum mediaType) throws IOException {
+        File sourceFile = new File(sourceFilePath);
         int[] date = null;
         try {
-            date = mediaInfoHelper.getCreateDate(sourcePath);
+            date = mediaInfoHelper.getCreateDate(sourceFilePath);
         }catch (Exception exception){
             log.error(exception.getMessage());
             saveFailedJob(sourceFile, mediaType, FailedReasonEnum.PARSE_FILENAME_FAILED);
@@ -159,34 +161,55 @@ public class SyncHelper {
         }
 
         if(date == null || date[0] == 0){
-            log.error("文件日期解析失败, file:{}", sourcePath);
+            log.error("文件日期解析失败, file:{}", sourceFilePath);
             saveFailedJob(sourceFile, mediaType, FailedReasonEnum.PARSE_FILENAME_FAILED);
             return;
         }
 
-        targetPath = StringUtils.rtrim(targetPath.trim(), File.separator) + File.separator + date[0] + File.separator;
+        boolean hasProcessed = mediaService.hasProcessed(sourceFilePath, sourceFile.getName());
+        if(hasProcessed){
+            return;
+        }
+
+        targetDirPath = StringUtils.rtrim(targetDirPath.trim(), File.separator) + File.separator + date[0] + File.separator;
 
         if(date[1] != 0){
-            targetPath = targetPath + File.separator + date[1];
+            targetDirPath = targetDirPath + File.separator + date[1];
         }
 
         if(date[2] != 0){
-            targetPath = targetPath + File.separator + date[2];
+            targetDirPath = targetDirPath + File.separator + date[2];
         }
 
-        String targetFilePath = targetPath + File.separator + sourceFile.getName();
+        String targetFilePath = targetDirPath + File.separator + sourceFile.getName();
 
-        Path path = Paths.get(targetPath);
+        Path path = Paths.get(targetDirPath);
         Files.createDirectories(path);
 
         File targetFile = new File(targetFilePath);
         if(targetFile.exists()){
-            
+            try {
+                if(FileUtils.isSaveFile(sourceFile, targetFile)){
+//                    saveSuccessRecord(sourceFile, targetFile, mediaType);
+                }
+            } catch (NoSuchAlgorithmException | IOException e) {
+                log.error("check save file failed, source:{}, target:{}, exception:{}", sourceFilePath, targetFilePath, e.getMessage());
+            }
+            return;
         }
 
+    }
 
+    private void doCopy(File sourceFile, String targetFilePath, MediaTypeEnum mediaType){
 
-
+        Media media = new Media();
+        media.setType(mediaType);
+        media.setFilename(sourceFile.getName());
+        media.setSourceDirPath(sourceFile.getAbsolutePath());
+        media.setReverseSourceDir(new StringBuilder(sourceFile.getAbsolutePath()).reverse().toString());
+        media.setTargetFilePath(targetFilePath);
+        media.setResult(1);
+        mediaService.save(media);
     }
 
     private void saveFailedJob(File sourceFile, MediaTypeEnum mediaType, FailedReasonEnum failedReason){

@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface MediaRepository extends PagingAndSortingRepository<Media, Long> {
 
     Optional<Media> findFirstByReverseSourceDirAndFilename(String reverseSourceDir, String filename);
+
+    boolean existsByReverseSourceDirAndFilename(String reverseSourceDir, String filename);
 }
