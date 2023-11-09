@@ -6,6 +6,7 @@ public enum FailedReasonEnum {
     UNKNOWN(0),
     REPEAT(1),
     PARSE_FILENAME_FAILED(2),
+    COPY_FAILED(3),
     ;
 
     @Getter

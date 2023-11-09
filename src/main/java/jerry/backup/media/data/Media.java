@@ -19,7 +19,7 @@ public class Media extends BaseModel<Long>{
     private String filename;
     private MediaTypeEnum type;
     private String sourceDirPath;
-    private String reverseSourceDir;    // 反转路径，做索引用
+    private String sourceDirMd5;
     private String targetFilePath;
     private Integer result;
 

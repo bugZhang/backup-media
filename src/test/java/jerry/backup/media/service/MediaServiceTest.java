@@ -50,7 +50,7 @@ public class MediaServiceTest {
     @Test
     public void hasProcessed(){
         String sourceDirPath = "/Users/jerry/Documents/java-workspace/holla/monkey/monkey-user-service/";
-        String filename = "2EqfkAt15";
+        String filename = "lDDyyBWM";
         boolean hasProcessed = mediaService.hasProcessed(sourceDirPath, filename);
         System.out.println("-----------------");
         System.out.println(hasProcessed);

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -19,16 +20,22 @@ public class FailedJobServiceTest {
     @Autowired
     private IFailedJobService failedJobService;
 
-    @RepeatedTest(1)
+    @RepeatedTest(2)
     public void save(){
         FailedJob failedJob = new FailedJob();
 
         failedJob.setReason(FailedReasonEnum.REPEAT);
-        failedJob.setFilename(StringUtils.randomString(8));
+        failedJob.setFilename("test-name-1");
         failedJob.setType(MediaTypeEnum.IMAGE);
-        failedJob.setSourceDirPath(StringUtils.randomString(80));
+        failedJob.setSourceDirPath("test_path_1");
         failedJob.setTargetFilePath("/Users/jerry/Documents/java-workspace/holla/monkey/target");
-        failedJobService.save(failedJob);
+
+        try {
+            failedJobService.save(failedJob);
+        }catch (DataIntegrityViolationException e){
+            System.out.println("主键重复:" + e.getMessage());
+        }
+
 
     }
 

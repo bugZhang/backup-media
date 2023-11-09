@@ -4,6 +4,7 @@ import jerry.backup.media.data.FailedJob;
 import jerry.backup.media.enums.FailedReasonEnum;
 import jerry.backup.media.repository.FailedJobRepository;
 import jerry.backup.media.service.IFailedJobService;
+import jerry.xtool.utils.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class FailedJobServiceImpl implements IFailedJobService {
     @Override
     public void save(FailedJob failedJob) {
 
-        failedJob.setReverseSourceDir(new StringBuilder(failedJob.getSourceDirPath()).reverse().toString());
+        failedJob.setSourceDirMd5(StringUtils.toMD5(failedJob.getSourceDirPath()));
 
         failedJobRepository.save(failedJob);
     }

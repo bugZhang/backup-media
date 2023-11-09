@@ -9,6 +9,7 @@ import jerry.backup.media.service.IMediaService;
 import jerry.xtool.utils.FileUtils;
 import jerry.xtool.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -40,12 +41,15 @@ public class SyncHelper {
     public void syncMedia(
             String sourcePath,
             String targetSource,
-            ArrayList<String> excludeFolderNames,
             ArrayList<String> excludeFileNames,
             MediaTypeEnum mediaType
-    ){
+    ) throws IOException {
 
         ArrayList<String> allMedia = findMedias(sourcePath, excludeFileNames, mediaType);
+
+        for (String mediaFilePath: allMedia){
+            copy(mediaFilePath, targetSource, mediaType);
+        }
 
     }
 
@@ -156,13 +160,13 @@ public class SyncHelper {
             date = mediaInfoHelper.getCreateDate(sourceFilePath);
         }catch (Exception exception){
             log.error(exception.getMessage());
-            saveFailedJob(sourceFile, mediaType, FailedReasonEnum.PARSE_FILENAME_FAILED);
+            saveFailed(sourceFile, mediaType, FailedReasonEnum.PARSE_FILENAME_FAILED);
             return;
         }
 
         if(date == null || date[0] == 0){
             log.error("文件日期解析失败, file:{}", sourceFilePath);
-            saveFailedJob(sourceFile, mediaType, FailedReasonEnum.PARSE_FILENAME_FAILED);
+            saveFailed(sourceFile, mediaType, FailedReasonEnum.PARSE_FILENAME_FAILED);
             return;
         }
 
@@ -188,31 +192,58 @@ public class SyncHelper {
 
         File targetFile = new File(targetFilePath);
         if(targetFile.exists()){
+            boolean isSame;
             try {
-                if(FileUtils.isSaveFile(sourceFile, targetFile)){
-//                    saveSuccessRecord(sourceFile, targetFile, mediaType);
-                }
+                isSame = FileUtils.isSaveFile(sourceFile, targetFile);
             } catch (NoSuchAlgorithmException | IOException e) {
                 log.error("check save file failed, source:{}, target:{}, exception:{}", sourceFilePath, targetFilePath, e.getMessage());
+                return;
             }
-            return;
+
+            // 目标文件已存在，但是却没有成功记录，可能是从其他的 source 目录已 copy 过来的，所以这里只保存本条数据成功记录即可
+            if(isSame){
+                saveSuccess(sourceFile, targetFilePath, mediaType);
+                log.info("duplicate target file, source:{}, target:{}", sourceFilePath, targetFilePath);
+            }else{
+                // 目标文件跟源文件虽然同名，但不是同一个文件，此时把目标文件改一下名字存入
+                targetFilePath = targetDirPath + File.separator + getDuplicateFileName(sourceFile.getName());
+            }
         }
+
+        doCopy(sourceFile, targetFilePath, mediaType);
 
     }
 
     private void doCopy(File sourceFile, String targetFilePath, MediaTypeEnum mediaType){
 
+        try {
+            FileUtils.copyFile(sourceFile, new File(targetFilePath));
+        }catch (IOException exception){
+            log.error("copy file failed: exception:{}, source:{}, dest:{}",
+                    exception.getMessage(),
+                    sourceFile.getAbsolutePath(),
+                    targetFilePath
+            );
+            saveFailed(sourceFile, mediaType, FailedReasonEnum.COPY_FAILED);
+            return;
+        }
+
+        saveSuccess(sourceFile, targetFilePath, mediaType);
+
+    }
+
+    private void saveSuccess(File sourceFile, String targetFilePath, MediaTypeEnum mediaType){
         Media media = new Media();
         media.setType(mediaType);
         media.setFilename(sourceFile.getName());
         media.setSourceDirPath(sourceFile.getAbsolutePath());
-        media.setReverseSourceDir(new StringBuilder(sourceFile.getAbsolutePath()).reverse().toString());
+        media.setSourceDirMd5(StringUtils.toMD5(sourceFile.getAbsolutePath()));
         media.setTargetFilePath(targetFilePath);
         media.setResult(1);
         mediaService.save(media);
     }
 
-    private void saveFailedJob(File sourceFile, MediaTypeEnum mediaType, FailedReasonEnum failedReason){
+    private void saveFailed(File sourceFile, MediaTypeEnum mediaType, FailedReasonEnum failedReason){
 
         FailedJob failedJob = new FailedJob();
         failedJob.setType(mediaType);
@@ -220,8 +251,17 @@ public class SyncHelper {
         failedJob.setFilename(sourceFile.getName());
         failedJob.setSourceDirPath(sourceFile.getAbsolutePath());
 
-        failedJobService.save(failedJob);
+        try {
+            failedJobService.save(failedJob);
+        }catch (DataIntegrityViolationException e){
+            log.warn("failed record duplicate, file:{}", sourceFile.getAbsolutePath());
+        }
 
+    }
+
+    private String getDuplicateFileName(String filename){
+        String ext = FileUtils.getFileExt(filename);
+        return StringUtils.rtrim(filename, "." + ext) + "_" + StringUtils.randomString(4) + "." + ext;
     }
 
 }
