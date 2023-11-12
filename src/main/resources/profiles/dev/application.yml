@@ -8,8 +8,26 @@ spring:
 
 backup:
   media:
-    sourcePath: "C://Temp"
-    targetPath: "dddd"
+    sourcePath: "Z:\\verysyncbackup\\mary_huawei_dcim\\Camera"
+    targetPath: "D:\\TDDOWNLOAD"
+    uncategorizedPath: "D:\\UNKNOWN"
     excludeFolderName:
-      - ".platform"
-      - ".git"
+      - ".verysync"
+      - ".trash"
+      - "cache"
+      - "Alipay"
+      - "snapseed"
+      - "sound"
+      - "com.baidu.BaiduMap"
+      - "douyin"
+      - "hiddenAlbum"
+      - "Lark"
+      - "Screenshots"
+      - "taobao"
+      - "HuaweiHealth"
+      - "Pindd"
+      - ""
+    excludeFileName:
+      - ".pending-"
+      - ".camera.jpg"
+      - "tb_image_share"

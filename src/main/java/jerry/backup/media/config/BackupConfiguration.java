@@ -18,6 +18,8 @@ public class BackupConfiguration {
 
     private ArrayList<String> excludeFolderName;
 
-    private ArrayList<String> excludeFileName;
+    private ArrayList<String> excludeFileName;  // 排除的文件名，包含就算
+
+    private String uncategorizedPath;   // 未解析到日期的文件夹
 
 }

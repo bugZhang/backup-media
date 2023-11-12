@@ -26,32 +26,11 @@ public class SyncJob implements InitializingBean {
 
     public void start(){
         log.info("sync job start ...");
-        startFailed();
-        startRepeat();
-        startMedia();;
     }
-
-    public void startFailed(){
-
-    }
-
-    public void startRepeat(){
-
-    }
-
-    public void startMedia(){
-
-    }
-
 
 
     @Override
     public void afterPropertiesSet() throws Exception {
         start();
-        ArrayList<String> all = syncHelper.findAllFolders(backupConfiguration.getSourcePath(), backupConfiguration.getExcludeFolderName());
-        for (String f : all){
-            System.out.println(f);
-        }
-
     }
 }

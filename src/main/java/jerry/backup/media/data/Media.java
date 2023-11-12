@@ -1,6 +1,7 @@
 package jerry.backup.media.data;
 
 import jerry.backup.media.enums.MediaTypeEnum;
+import jerry.backup.media.enums.SyncStatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -21,7 +22,5 @@ public class Media extends BaseModel<Long>{
     private String sourceDirPath;
     private String sourceDirMd5;
     private String targetFilePath;
-    private Integer result;
-
-
+    private SyncStatusEnum status;
 }

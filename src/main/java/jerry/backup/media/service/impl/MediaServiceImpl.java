@@ -1,6 +1,7 @@
 package jerry.backup.media.service.impl;
 
 import jerry.backup.media.data.Media;
+import jerry.backup.media.enums.SyncStatusEnum;
 import jerry.backup.media.repository.MediaRepository;
 import jerry.backup.media.service.IMediaService;
 import jerry.xtool.utils.StringUtils;
@@ -30,7 +31,7 @@ public class MediaServiceImpl implements IMediaService {
     }
 
     @Override
-    public boolean hasProcessed(String sourceDirPath, String filename) {
-        return mediaRepository.existsBySourceDirMd5AndFilename(StringUtils.toMD5(sourceDirPath), filename);
+    public boolean existsWithStatus(String sourceDirPath, String filename, SyncStatusEnum status) {
+        return mediaRepository.existsBySourceDirMd5AndFilenameAndStatus(StringUtils.toMD5(sourceDirPath), filename, status);
     }
 }
