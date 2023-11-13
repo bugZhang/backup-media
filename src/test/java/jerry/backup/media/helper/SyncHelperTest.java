@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 @SpringBootTest
@@ -22,7 +21,7 @@ public class SyncHelperTest {
     private BackupConfiguration configuration;
 
     @Test
-    public void startMedia() throws IOException {
+    public void startMedia() {
         String sourcePath = configuration.getSourcePath();
         String targetPath = configuration.getTargetPath();
 

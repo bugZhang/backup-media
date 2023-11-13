@@ -31,13 +31,16 @@ public class SyncHelper {
 
     private final IMediaService mediaService;
     private final MediaInfoHelper mediaInfoHelper;
+    private final ToolExecutor executor;
 
     public SyncHelper(
             IMediaService mediaService,
-            MediaInfoHelper mediaInfoHelper
+            MediaInfoHelper mediaInfoHelper,
+            ToolExecutor executor
     ) {
         this.mediaService = mediaService;
         this.mediaInfoHelper = mediaInfoHelper;
+        this.executor = executor;
     }
 
     public void start(
@@ -47,7 +50,7 @@ public class SyncHelper {
             ArrayList<String> excludeFolders,
             ArrayList<String> excludeFileNames,
             MediaTypeEnum mediaType
-    ) throws IOException {
+    ) {
 
         // todo 三个路径做检测 是否有空值
 
@@ -71,7 +74,7 @@ public class SyncHelper {
             int size = allFolders.size();
             String tPath = allFolders.get(size - 1);
             allFolders.remove(size - 1);
-            syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType);
+            executor.execute(() -> this.syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType));
             syncFolderLock.getAndDecrement();
 
         }
@@ -85,7 +88,7 @@ public class SyncHelper {
             String uncategorizedPath,
             ArrayList<String> excludeFileNames,
             MediaTypeEnum mediaType
-    ) throws IOException {
+    ) {
 
         Instant startAt = Instant.now();
         log.info("start sync directory, path:{}, at:{}", sourcePath, startAt.toString());
@@ -93,14 +96,17 @@ public class SyncHelper {
         ArrayList<String> allMedia = findMedias(sourcePath, excludeFileNames, mediaType);
 
         for (String mediaFilePath: allMedia){
-            sync(mediaFilePath, targetSource, uncategorizedPath);
+            try {
+                sync(mediaFilePath, targetSource, uncategorizedPath);
+            } catch (IOException e) {
+                log.error("sync file failed, exception:{}, mediaFilePath:{}, targetSource:{}, uncategorizedPath:{}",
+                        e.getMessage(), mediaFilePath, targetSource, uncategorizedPath);
+            }
         }
 
         int lock = syncFolderLock.getAndIncrement();
         String threadName = Thread.currentThread().getName();
-
         log.info("end sync directory, use:{} seconds, lock:{}, thread:{}, path:{}", Instant.now().getEpochSecond() - startAt.getEpochSecond(), lock, threadName, sourcePath);
-
     }
 
     private void sync(String sourceFilePath, String targetDirPath, String uncategorizedPath) throws IOException {

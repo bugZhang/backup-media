@@ -8,7 +8,7 @@ spring:
 
 backup:
   media:
-    sourcePath: "Z:\\verysyncbackup\\mary_huawei_dcim\\Camera"
+    sourcePath: "Z:\\照片"
     targetPath: "D:\\TDDOWNLOAD"
     uncategorizedPath: "D:\\UNKNOWN"
     excludeFolderName:
@@ -26,7 +26,9 @@ backup:
       - "taobao"
       - "HuaweiHealth"
       - "Pindd"
-      - ""
+      - "证件"
+      - "婚纱"
+      - "结婚"
     excludeFileName:
       - ".pending-"
       - ".camera.jpg"
