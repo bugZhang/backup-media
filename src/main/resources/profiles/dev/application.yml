@@ -8,9 +8,9 @@ spring:
 
 backup:
   media:
-    sourcePath: "Z:\\照片"
-    targetPath: "D:\\TDDOWNLOAD"
-    uncategorizedPath: "D:\\UNKNOWN"
+    sourcePath: "Z:\\verysyncbackup"
+    targetPath: "E:\\TimeMachine"
+    uncategorizedPath: "E:\\TimeMachine\\UNKNOWN"
     excludeFolderName:
       - ".verysync"
       - ".trash"
@@ -29,6 +29,10 @@ backup:
       - "证件"
       - "婚纱"
       - "结婚"
+      - "jerry-xiaomi"
+      - "mary-iphone"
+      - "Mi Note 2"
+      - "马丽的 iPhone"
     excludeFileName:
       - ".pending-"
       - ".camera.jpg"

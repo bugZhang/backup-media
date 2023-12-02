@@ -7,6 +7,7 @@ import jerry.backup.media.service.IMediaService;
 import jerry.xtool.utils.FileUtils;
 import jerry.xtool.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -75,8 +77,8 @@ public class SyncHelper {
             String tPath = allFolders.get(size - 1);
             allFolders.remove(size - 1);
             executor.execute(() -> this.syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType));
+//            this.syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType);
             syncFolderLock.getAndDecrement();
-
         }
 
 
@@ -214,20 +216,11 @@ public class SyncHelper {
 
         try {
             mediaService.save(media);
-        }catch (DataIntegrityViolationException e){
-            log.warn("failed record duplicate, status:{}, file:{}", media.getStatus(), sourceFilePath);
+        }catch (ConstraintViolationException ignored){
+
+        }catch (Exception e){
+            log.warn("failed record duplicate, status:{}, file:{}, message:{}", media.getStatus(), sourceFilePath, e.getMessage());
         }
-    }
-
-    private void saveFailedRecord(String sourceFilePath, String filename, String targetPath, SyncStatusEnum status){
-
-        Media media = new Media();
-        media.setFilename(filename);
-        media.setSourceDirPath(sourceFilePath);
-        media.setTargetFilePath(targetPath);
-        media.setStatus(status);
-
-        save(media);
     }
 
     private ArrayList<String> findMedias(String sourcePath,
@@ -247,6 +240,10 @@ public class SyncHelper {
 
         for (File file: files){
             if(file.isFile()){
+
+                if(file.isHidden()){
+                    continue;
+                }
 
                 String filename = file.getName();
                 boolean checkType;
