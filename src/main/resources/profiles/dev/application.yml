@@ -33,6 +33,7 @@ backup:
       - "mary-iphone"
       - "Mi Note 2"
       - "马丽的 iPhone"
+      - "100ANDRO"
     excludeFileName:
       - ".pending-"
       - ".camera.jpg"
