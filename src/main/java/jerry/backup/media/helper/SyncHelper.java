@@ -113,6 +113,15 @@ public class SyncHelper {
 
     private void sync(String sourceFilePath, String targetDirPath, String uncategorizedPath) throws IOException {
         File sourceFile = new File(sourceFilePath);
+
+        // 先检查源文件是否已经被同步过了，如果同步过了就这个跳过
+        Optional<Media> mediaOpt = mediaService.findBySourceDirAndFilename(sourceFilePath, sourceFile.getName());
+        if(mediaOpt.isPresent()){
+            if(mediaOpt.get().getStatus() == SyncStatusEnum.SUCCESS || mediaOpt.get().getStatus() == SyncStatusEnum.FAILED_PARSE_FILENAME){
+                return;
+            }
+        }
+
         int[] date = null;
         try {
             date = mediaInfoHelper.getCreateDate(sourceFilePath);
@@ -143,7 +152,6 @@ public class SyncHelper {
             targetFilePath = targetDirPath + File.separator + sourceFile.getName();
         }
 
-
         Path path = Paths.get(targetDirPath);
         Files.createDirectories(path);
 
@@ -156,33 +164,22 @@ public class SyncHelper {
         media.setStatus(status);
 
         if (targetFile.exists()){
-
-            // 防止相同名字的不同文件，所以这里先检查一下数据库是否有记录
-            // 如果没有记录了再去对比文件 hash
-            Optional<Media> mediaOpt = mediaService.findBySourceDirAndFilename(sourceFilePath, sourceFile.getName());
-            if(mediaOpt.isPresent()){
-                media = mediaOpt.get();
-                if(mediaOpt.get().getStatus() == SyncStatusEnum.SUCCESS || mediaOpt.get().getStatus() == SyncStatusEnum.FAILED_PARSE_FILENAME){
-                    return;
-                }
+            boolean isSame;
+            try {
+                isSame = FileUtils.isSaveFile(sourceFile, targetFile);
+            } catch (NoSuchAlgorithmException | IOException e) {
+                log.error("check save file failed, source:{}, target:{}, exception:{}", sourceFilePath, targetFilePath, e.getMessage());
+                return;
+            }
+            if(isSame){
+                // 目标文件已存在，但是却没有成功记录，可能是从其他的 source 目录已 copy 过来的，所以这里只保存本条数据成功记录即可
+                save(media);
+                log.info("duplicate target file, source:{}, target:{}", sourceFilePath, targetFilePath);
+                return;
             }else {
-                boolean isSame;
-                try {
-                    isSame = FileUtils.isSaveFile(sourceFile, targetFile);
-                } catch (NoSuchAlgorithmException | IOException e) {
-                    log.error("check save file failed, source:{}, target:{}, exception:{}", sourceFilePath, targetFilePath, e.getMessage());
-                    return;
-                }
-                if(isSame){
-                    // 目标文件已存在，但是却没有成功记录，可能是从其他的 source 目录已 copy 过来的，所以这里只保存本条数据成功记录即可
-                    save(media);
-                    log.info("duplicate target file, source:{}, target:{}", sourceFilePath, targetFilePath);
-                    return;
-                }else {
-                    // 目标文件跟源文件虽然同名，但不是同一个文件，此时把目标文件改一下名字存入
-                    targetFilePath = targetDirPath + File.separator + getDuplicateFileName(sourceFile);
-                    targetFile = new File(targetFilePath);
-                }
+                // 目标文件跟源文件虽然同名，但不是同一个文件，此时把目标文件改一下名字存入
+                targetFilePath = targetDirPath + File.separator + getDuplicateFileName(sourceFile);
+                targetFile = new File(targetFilePath);
             }
         }
 

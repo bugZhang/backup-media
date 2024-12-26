@@ -9,8 +9,9 @@ spring:
 backup:
   media:
     sourcePath: "Z:\\verysyncbackup"
-    targetPath: "E:\\TimeMachine"
-    uncategorizedPath: "E:\\TimeMachine\\UNKNOWN"
+#    sourcePath: "Z:\\照片"
+    targetPath: "D:\\TimeMachine"
+    uncategorizedPath: "D:\\TimeMachine\\UNKNOWN"
     excludeFolderName:
       - ".verysync"
       - ".trash"
@@ -34,6 +35,7 @@ backup:
       - "Mi Note 2"
       - "马丽的 iPhone"
       - "100ANDRO"
+      - "朵朵满月视频"
     excludeFileName:
       - ".pending-"
       - ".camera.jpg"

@@ -16,9 +16,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -39,6 +43,12 @@ public class MediaInfoHelper {
             "vid_", "VID_"
     };
 
+    // PARSE_WITH_ATTRIBUTE
+    private final String[] parseDateFromAttributeFileNamePrefix = {
+            "PAS_ATR_"
+    };
+
+
     private final String[] cleanContain = {
     };
 
@@ -58,6 +68,10 @@ public class MediaInfoHelper {
 
         if (date[0] == 0) {
             date = parseDateFromMetaData(file);
+        }
+
+        if (date[0] == 0) {
+            date = parseDateFromAttributeData(file);
         }
 
         if (date[0] == 0) {
@@ -243,4 +257,35 @@ public class MediaInfoHelper {
         return date;
 
     }
+
+    public int[] parseDateFromAttributeData(File file) throws IOException {
+        if (!file.exists()) {
+            throw new RuntimeException("文件不存在, file:" + file.getAbsolutePath());
+        }
+
+        String fileName = file.getName();
+
+        boolean parse = false;
+        for (String prefix : parseDateFromAttributeFileNamePrefix) {
+            if(fileName.startsWith(prefix)){
+                parse = true;
+                break;
+            }
+        }
+        int[] date = new int[3];
+        if (!parse){
+            return date;
+        }
+
+        BasicFileAttributes attributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+        long lastModifiedTimeMillis = attributes.lastModifiedTime().toMillis();
+        LocalDateTime localDateTime = DateTimeUtils.instantToLocalDateTime(Instant.ofEpochMilli(lastModifiedTimeMillis), "Asia/Shanghai");
+
+        date[0] = localDateTime.getYear();
+        date[1] = localDateTime.getMonthValue();
+        date[2] = localDateTime.getDayOfMonth();
+
+        return date;
+    }
+
 }
