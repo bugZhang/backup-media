@@ -20,7 +20,7 @@ public class ToolExecutor implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        log.info(getClass().getName() + " init: corePoolSize:{}, maximumPoolSize:{} ", corePoolSize, maximumPoolSize);
+        log.info("{} init: corePoolSize:{}, maximumPoolSize:{} ", getClass().getName(), corePoolSize, maximumPoolSize);
 
         executor = new ThreadPoolExecutor(
                 corePoolSize,   // 线程池的核心线程数量

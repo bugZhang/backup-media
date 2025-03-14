@@ -17,6 +17,7 @@ public class ToolThreadFactory implements ThreadFactory {
     public Thread newThread(Runnable r) {
         String threadName = this.threadName + nextId.getAndIncrement();
         Thread thread = new Thread(null, r, threadName, 0);
+        thread.setDaemon(true);
         return thread;
     }
 }
