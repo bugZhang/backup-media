@@ -14,8 +14,14 @@ backup:
     uncategorizedPath: "D:\\TimeMachine\\UNKNOWN"
     excludeFolderName:
       - ".verysync"
+      - ".gs_fs0"
+      - ".gs_fs6"
+      - ".gs"
+      - ".Gallery2"
+      - ".dvm_d"
       - ".trash"
       - "cache"
+      - "boarding"
       - "Alipay"
       - "snapseed"
       - "sound"
@@ -36,6 +42,8 @@ backup:
       - "马丽的 iPhone"
       - "100ANDRO"
       - "朵朵满月视频"
+      - "百度地图"
+      - "VideoEditor"
     excludeFileName:
       - ".pending-"
       - ".camera.jpg"

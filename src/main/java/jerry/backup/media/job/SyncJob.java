@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 @Component
 @Slf4j
-public class SyncJob implements InitializingBean {
+public class SyncJob {
 
     private final BackupConfiguration configuration;
 
@@ -31,6 +31,7 @@ public class SyncJob implements InitializingBean {
     }
 
     public void start(){
+        log.info("Starting sync job");
         String sourcePath = configuration.getSourcePath();
         String targetPath = configuration.getTargetPath();
 
@@ -39,11 +40,5 @@ public class SyncJob implements InitializingBean {
         MediaTypeEnum mediaType = MediaTypeEnum.ALL;
 
         syncHelper.start(sourcePath, targetPath, configuration.getUncategorizedPath(), excludeFolders, excludeFilenames, mediaType);
-    }
-
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        executor.execute(this::start);
     }
 }
