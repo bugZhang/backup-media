@@ -184,7 +184,7 @@ public class MediaInfoHelper {
         MediaInfoHelper mediaInfoHelper = new MediaInfoHelper();
 
         List<String> filenames = new ArrayList<>();
-        filenames.add("Z:\\verysyncbackup\\jerry-xiaomi\\DCIM\\Screenshots\\Screenshot_2021-01-28-22-41-03-689_com.tencent.mm.jpg");
+        filenames.add("D:\\TimeMachine\\2025\\07\\IMG_1663.JPG");
 //        filenames.add("20190826_0083.JPG");
 //        filenames.add("IMG_20230927.JPG");
 //        filenames.add("IMG_2022-11-25.JPG");
@@ -249,7 +249,7 @@ public class MediaInfoHelper {
             return date;
         }
 
-        LocalDateTime localDateTime = DateTimeUtils.instantToLocalDateTime(createDate.toInstant(), "Asia/Shanghai");
+        LocalDateTime localDateTime = DateTimeUtils.instantToLocalDateTime(createDate.toInstant(), "UTC");
         date[0] = localDateTime.getYear();
         date[1] = localDateTime.getMonthValue();
         date[2] = localDateTime.getDayOfMonth();

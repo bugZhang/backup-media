@@ -137,7 +137,7 @@ public class SyncHelper {
             targetFilePath = targetDirPath + File.separator + sourceFile.getName();
             status = SyncStatusEnum.FAILED_PARSE_FILENAME;
         }else {
-            targetDirPath = StringUtils.rtrim(targetDirPath.trim(), File.separator) + File.separator + date[0] + File.separator;
+            targetDirPath = StringUtils.rtrim(targetDirPath.trim(), File.separator) + File.separator + date[0];
 
             if(date[1] != 0){
                 String month = date[1] < 10 ? "0" + date[1] : String.valueOf(date[1]);
