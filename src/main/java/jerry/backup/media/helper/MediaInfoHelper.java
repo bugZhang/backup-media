@@ -249,7 +249,7 @@ public class MediaInfoHelper {
             return date;
         }
 
-        LocalDateTime localDateTime = DateTimeUtils.instantToLocalDateTime(createDate.toInstant(), "UTC");
+        LocalDateTime localDateTime = DateTimeUtils.instantToLocalDateTime(createDate.toInstant(), "Asia/Shanghai");
         date[0] = localDateTime.getYear();
         date[1] = localDateTime.getMonthValue();
         date[2] = localDateTime.getDayOfMonth();
