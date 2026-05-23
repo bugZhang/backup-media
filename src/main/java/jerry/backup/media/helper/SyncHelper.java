@@ -8,7 +8,6 @@ import jerry.xtool.utils.FileUtils;
 import jerry.xtool.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -17,19 +16,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public class SyncHelper {
-
-    public volatile static AtomicInteger syncFolderLock = new AtomicInteger(2);
-
-    private final Object syncLock = new Object();
 
     private final IMediaService mediaService;
     private final MediaInfoHelper mediaInfoHelper;
@@ -54,7 +49,9 @@ public class SyncHelper {
             MediaTypeEnum mediaType
     ) {
 
-        // todo 三个路径做检测 是否有空值
+        if (StringUtils.isEmpty(sourcePath) || StringUtils.isEmpty(targetSource) || StringUtils.isEmpty(uncategorizedPath)) {
+            throw new IllegalArgumentException("sourcePath, targetSource, uncategorizedPath 不能为空");
+        }
 
         Instant startAt = Instant.now();
         log.info("start task:{}, at:{}", sourcePath, startAt.toString());
@@ -62,26 +59,26 @@ public class SyncHelper {
         ArrayList<String> allFolders = findAllFolders(sourcePath, excludeFolders);
         allFolders.add(sourcePath);
 
-        while (!allFolders.isEmpty()){
+        CountDownLatch latch = new CountDownLatch(allFolders.size());
 
-            if(syncFolderLock.intValue() == 0){
+        for (String tPath : allFolders) {
+            executor.execute(() -> {
                 try {
-                    Thread.sleep(1000 * 5);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    this.syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType);
+                } finally {
+                    latch.countDown();
                 }
-                continue;
-            }
-
-            int size = allFolders.size();
-            String tPath = allFolders.get(size - 1);
-            allFolders.remove(size - 1);
-            executor.execute(() -> this.syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType));
-//            this.syncDir(tPath, targetSource, uncategorizedPath, excludeFileNames, mediaType);
-            syncFolderLock.getAndDecrement();
+            });
         }
 
+        try {
+            latch.await(24, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            log.error("sync task interrupted", e);
+            Thread.currentThread().interrupt();
+        }
 
+        log.info("all sync tasks completed, use:{} seconds", Instant.now().getEpochSecond() - startAt.getEpochSecond());
     }
 
     private void syncDir(
@@ -106,9 +103,8 @@ public class SyncHelper {
             }
         }
 
-        int lock = syncFolderLock.getAndIncrement();
         String threadName = Thread.currentThread().getName();
-        log.info("end sync directory, use:{} seconds, lock:{}, thread:{}, path:{}", Instant.now().getEpochSecond() - startAt.getEpochSecond(), lock, threadName, sourcePath);
+        log.info("end sync directory, use:{} seconds, thread:{}, path:{}", Instant.now().getEpochSecond() - startAt.getEpochSecond(), threadName, sourcePath);
     }
 
     private void sync(String sourceFilePath, String targetDirPath, String uncategorizedPath) throws IOException {

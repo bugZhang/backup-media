@@ -1,0 +1,1 @@
+alter table `media` MODIFY COLUMN  `filename` VARCHAR(125) NOT NULL DEFAULT '';

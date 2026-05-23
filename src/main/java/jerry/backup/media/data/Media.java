@@ -18,9 +18,14 @@ public class Media extends BaseModel<Long>{
     private Long id;
 
     private String filename;
+
+    @Enumerated(EnumType.ORDINAL)
     private MediaTypeEnum type;
+
     private String sourceDirPath;
     private String sourceDirMd5;
     private String targetFilePath;
+
+    @Enumerated(EnumType.ORDINAL)
     private SyncStatusEnum status;
 }
